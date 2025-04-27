@@ -1,0 +1,147 @@
+---
+title: "Apoorv – UNICEF Indicators Dashboard"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+---
+
+```{python}
+
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+import warnings
+warnings.filterwarnings('ignore')
+
+indicator1 = pd.read_csv("unicef_indicator_1.csv")
+indicator2 = pd.read_csv("unicef_indicator_2.csv")
+metadata = pd.read_csv("unicef_metadata.csv")
+indicator1 = indicator1.dropna(subset=["obs_value"])
+indicator2 = indicator2.dropna(subset=["obs_value"])
+metadata = metadata.dropna(subset=["year"])
+
+```
+
+```{python}
+
+early_marriage = indicator1[(indicator1["indicator"].str.contains("household chores", case=False)) & (indicator1["sex"] == "Female")]
+early_marriage_top10 = early_marriage.sort_values("obs_value", ascending=False).head(10)
+fig = px.bar(early_marriage_top10, x="country", y="obs_value", title="Top 10 Countries - household chores (Females 10-14)", text="obs_value")
+fig.show()
+
+```
+
+### *Widespread Issue: The bar chart shows countries with over 20% of girls aged 10-14 engaged in excessive household chores, limiting their opportunities*
+
+### *Policy Focus: These top 10 nations highlight the urgent need for interventions to reduce chore burdens and support girls’ education in low-income regions*
+
+```{python}
+
+overweight = indicator2[indicator2["indicator"].str.contains("overweight", case=False)]
+overweight = overweight.groupby("time_period")["obs_value"].mean().reset_index()
+fig = px.line(overweight, x="time_period", y="obs_value", title="Trend of Overweight in Under 5 Children")
+fig.show()
+
+```
+
+### *Gradual Rise: The line graph reveals a slight increase in global overweight prevalence among under-5 children over time.*
+
+### *Health Alert: This trend underscores the need for global nutrition programs to combat rising childhood obesity.*
+
+```{python}
+
+overweight_latest = indicator2[indicator2["time_period"] == indicator2["time_period"].max()]
+overweight_latest = overweight_latest.merge(metadata, left_on=["country"], right_on=["country"])
+overweight_latest = overweight_latest.dropna(subset=["GDP per capita (constant 2015 US$)"])
+fig = px.scatter(overweight_latest, x="GDP per capita (constant 2015 US$)", y="obs_value", hover_name="country", title="Overweight % (Under 5) vs GDP per Capita")
+fig.show()
+
+```
+
+### *Economic Link: Wealthier nations show lower overweight rates in under-5 children.*
+
+### *Disparity Highlight: Poorer countries exhibit higher rates, suggesting economic development could reduce childhood obesity.*
+
+```{python}
+
+
+early_marriage = indicator1[(indicator1["indicator"].str.contains("household chores", case=False)) & (indicator1["sex"] == "Female")]
+early_marriage_top10 = early_marriage.sort_values("obs_value", ascending=False).head(10)
+fig = px.bar(early_marriage_top10, x="country", y="obs_value", title="Top 10 Countries - household chores (Females 10-14)", text="obs_value")
+fig.show()
+
+```
+
+```{python}
+
+overweight = indicator2[indicator2["indicator"].str.contains("overweight", case=False)]
+overweight = overweight.groupby("time_period")["obs_value"].mean().reset_index()
+fig = px.line(overweight, x="time_period", y="obs_value", title="Trend of Overweight in Under 5 Children")
+fig.show()
+
+```
+
+```{python}
+
+
+overweight_latest = indicator2[indicator2["time_period"] == indicator2["time_period"].max()]
+overweight_latest = overweight_latest.merge(metadata, left_on=["country"], right_on=["country"])
+overweight_latest = overweight_latest.dropna(subset=["GDP per capita (constant 2015 US$)"])
+fig = px.scatter(overweight_latest, x="GDP per capita (constant 2015 US$)", y="obs_value", hover_name="country", title="Overweight % (Under 5) vs GDP per Capita")
+fig.show()
+
+```
+
+```{python}
+
+
+early_marriage_latest = early_marriage[early_marriage["time_period"] == early_marriage["time_period"].max()]
+early_marriage_latest = early_marriage_latest.merge(metadata, left_on=["country"], right_on=["country"])
+early_marriage_latest = early_marriage_latest.dropna(subset=["Life expectancy at birth, total (years)"])
+fig = px.scatter(early_marriage_latest, x="Life expectancy at birth, total (years)", y="obs_value", hover_name="country", title="household chores % vs Life Expectancy")
+fig.show()
+
+```
+
+### *Social Impact: Higher chore rates in lower life expectancy nations indicate socioeconomic barriers that need addressing.*
+
+```{python}
+
+overw_birth = overweight_latest.dropna(subset=["Birth rate, crude (per 1,000 people)"])
+fig = px.scatter(overw_birth, x="Birth rate, crude (per 1,000 people)", y="obs_value", hover_name="country", title="Birth Rate vs Overweight Children (%)")
+fig.show()
+
+
+```
+
+### *Positive Correlation: Regions with higher birth rates tend to have elevated overweight percentages in under-5 children.*
+
+### *Regional Insight: This scatter plot suggests that high birth rates may strain resources, contributing to childhood obesity in some areas.*
+
+```{python}
+
+
+gdp_life = metadata.dropna(subset=["GDP per capita (constant 2015 US$)", "Life expectancy at birth, total (years)"])
+fig = px.scatter(gdp_life, x="GDP per capita (constant 2015 US$)", y="Life expectancy at birth, total (years)", hover_name="country", trendline="ols", title="GDP per Capita vs Life Expectancy")
+fig.show()
+
+
+```
+
+```{python}
+
+
+observations = [
+    "1. Countries with higher GDP per capita generally have lower rates of child overweight under 5 years.",
+    "2. Sub-Saharan African countries dominate the top 10 for household chores among girls aged 10-14, highlighting a regional challenge.",
+    "3. High birth rates may contribute to poor nutritional outcomes, increasing overweight prevalence in children under 5.",
+    "4. Birth rates are positively correlated with higher prevalence of overweight in children under 5 in some regions.",
+    "5. Global average overweight percentage in under 5 children has increased slightly over recent years."
+]
+for line in observations:
+    print(line)
+
+
+```
